@@ -19,20 +19,57 @@ if not user_data:
     st.error("User not found.")
     st.stop()
 
-# 🎯 Editable fields
-st.markdown("### 🧾 Profile Details")
-editable_fields = ["full_name", "email", "education", "skills", "projects", "certifications", "summary"]
-updated_data = {}
+# ----------------------------
+# 🎯 Editable Profile Form
+# ----------------------------
+st.markdown("### 🧾 Update Profile Information")
 
-for field in editable_fields:
-    updated_data[field] = st.text_area(
-        label=field.replace("_", " ").title(),
-        value=user_data[field] or "",
-        height=100
-    )
+# Full Name
+full_name = st.text_input("👤 Full Name", value=user_data.get("full_name") or "")
 
-# 💾 Save updates
-if st.button("💾 Save Changes"):
-    for field, value in updated_data.items():
-        update_user_info(username, field, value)
-    st.success("✅ Profile updated successfully! Refresh to view updated data.")
+# Email
+email = st.text_input("📧 Email", value=user_data.get("email") or "")
+
+# Education
+education_levels = ["High School", "Diploma", "Bachelor's Degree", "Master's Degree", "PhD", "Other"]
+selected_level = st.selectbox("🎓 Highest Education", education_levels, index=education_levels.index("Bachelor's Degree") if user_data.get("education") else 0)
+education_details = st.text_input("📘 Education Details (e.g., B.Tech in AIML, GH Raisoni College)", value=user_data.get("education") or "")
+
+# Skills (Multi-Select)
+available_skills = ["Python", "SQL", "Machine Learning", "Deep Learning", "NLP", "Flask", "Streamlit", "Tableau", "Power BI", "Data Analysis", "Java", "C++", "AWS", "Docker"]
+skills_selected = st.multiselect("🛠 Skills (select multiple)", available_skills, default=(user_data.get("skills") or "").split(", "))
+
+# Projects
+projects = st.text_area("📂 Projects (separate by commas)", value=user_data.get("projects") or "")
+
+# Certifications
+certifications = st.text_area("📜 Certifications (separate by commas)", value=user_data.get("certifications") or "")
+
+# Summary (300 characters max)
+summary = st.text_area("📝 Professional Summary (max 300 characters)", value=user_data.get("summary") or "", max_chars=300)
+st.caption(f"Characters used: {len(summary)}/300")
+
+# ----------------------------
+# 💾 Save Updates
+# ----------------------------
+if st.button("💾 Save Profile"):
+    update_user_info(username, "full_name", full_name)
+    update_user_info(username, "email", email)
+    update_user_info(username, "education", education_details)
+    update_user_info(username, "skills", ", ".join(skills_selected))
+    update_user_info(username, "projects", projects)
+    update_user_info(username, "certifications", certifications)
+    update_user_info(username, "summary", summary)
+
+    # Update session state too
+    st.session_state.user_info.update({
+        "full_name": full_name,
+        "email": email,
+        "education": education_details,
+        "skills": ", ".join(skills_selected),
+        "projects": projects,
+        "certifications": certifications,
+        "summary": summary
+    })
+
+    st.success("✅ Profile updated successfully!")
